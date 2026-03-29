@@ -110,4 +110,8 @@ sudo systemctl enable --now $PROJECT_NAME.socket
 
 echo "8" | sudo tee /home/student/gradebook
 
+echo "🔄 Blocking default user (creator)"
+sudo usermod -L creator
+sudo usermod -s /usr/sbin/nologin creator
+
 echo "✅ Complete: http://192.168.64.9"
