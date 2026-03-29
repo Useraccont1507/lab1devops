@@ -70,8 +70,9 @@ struct InventoryController: RouteCollection {
             </html>
             """
             return try await htmlToResponse(html, for: req)
+        }  else {
+            return try await dto.encodeResponse(for: req)
         }
-        return try await dto.encodeResponse(for: req)
     }
     func getItem(req: Request) async throws -> Response {
         guard let itemIdString = req.parameters.get("itemId"),
@@ -104,8 +105,9 @@ struct InventoryController: RouteCollection {
             </html>
             """
             return try await htmlToResponse(html, for: req)
+        } else {
+            return try await dto.encodeResponse(for: req)
         }
-        return try await dto.encodeResponse(for: req)
     }
     func createItem(req: Request) async throws -> Response {
         try CreateInventoryItemDTO.validate(content: req)
