@@ -12,6 +12,6 @@ struct GetInventoryItemDTO: Content {
     let id: UUID
     let name: String
     let quantity: Int
-    let created_at: String
+    let created_at: Int
 }
 
