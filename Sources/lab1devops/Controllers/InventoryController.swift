@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  InventoryController.swift
 //  lab1devops
 //
 //  Created by Illia Verezei on 29.03.2026.
@@ -22,16 +22,22 @@ struct InventoryController: RouteCollection {
     }
     func getRoot(req: Request) async throws -> Response {
         let html = """
+        <!DOCTYPE html>
+        <html>
+        <head><meta charset="utf-8"><title>Inventory API</title></head>
+        <body>
             <h1>MyWebApp - Simple Inventory</h1>
             <ul>
                 <li><a href="/items">GET /items</a> - List all items</li>
-                <li>POST /items - Create new item</li>
+                <li>POST /items - Create new item (use curl or Postman)</li>
                 <li>GET /items/&lt;id&gt; - Get item details</li>
                 <li><a href="/health/alive">GET /health/alive</a> - Liveness</li>
                 <li><a href="/health/ready">GET /health/ready</a> - Readiness</li>
             </ul>
-            """
-        return try await html.encodeResponse(for: req)
+        </body>
+        </html>
+        """
+        return try await htmlToResponse(html, for: req)
     }
     func getReady(req: Request) async throws -> Response {
         do {
@@ -49,9 +55,21 @@ struct InventoryController: RouteCollection {
         })
         
         if req.headers.accept.contains(where: { $0.mediaType == .html }) {
-            var tableRows = dto.items.map { "<tr><td>\($0.id)</td><td>\($0.name)</td></tr>" }.joined()
-            let html = "<h1>Items</h1><table border='1'><tr><th>ID</th><th>Name</th></tr>\(tableRows)</table>"
-            return try await html.encodeResponse(for: req)
+            let tableRows = dto.items.map { "<tr><td>\($0.id)</td><td><a href='/items/\($0.id)'>\($0.name)</a></td></tr>" }.joined()
+            let html = """
+            <!DOCTYPE html>
+            <html>
+            <body>
+                <h1>Items List</h1>
+                <table border='1'>
+                    <tr><th>ID</th><th>Name</th></tr>
+                    \(tableRows)
+                </table>
+                <br><a href="/">Back to Home</a>
+            </body>
+            </html>
+            """
+            return try await htmlToResponse(html, for: req)
         }
         return try await dto.encodeResponse(for: req)
     }
@@ -72,14 +90,20 @@ struct InventoryController: RouteCollection {
         
         if req.headers.accept.contains(where: { $0.mediaType == .html }) {
             let html = """
+            <!DOCTYPE html>
+            <html>
+            <body>
                 <h1>Item Details</h1>
-                <p>ID: \(dto.id)</p>
-                <p>Name: \(dto.name)</p>
-                <p>Quantity: \(dto.quantity)</p>
-                <p>Created At: \(dto.created_at)</p>
+                <p><b>ID:</b> \(dto.id)</p>
+                <p><b>Name:</b> \(dto.name)</p>
+                <p><b>Quantity:</b> \(dto.quantity)</p>
+                <p><b>Created At:</b> \(dto.created_at)</p>
+                <hr>
                 <a href="/items">Back to list</a>
-                """
-            return try await html.encodeResponse(for: req)
+            </body>
+            </html>
+            """
+            return try await htmlToResponse(html, for: req)
         }
         return try await dto.encodeResponse(for: req)
     }
@@ -91,6 +115,11 @@ struct InventoryController: RouteCollection {
         
         try await item.save(on: req.db)
         
-        return Response(status: .ok)
+        return Response(status: .ok, body: .init(string: "OK"))
+    }
+    private func htmlToResponse(_ html: String, for req: Request) async throws -> Response {
+        let res = Response(status: .ok, body: .init(string: html))
+        res.headers.replaceOrAdd(name: .contentType, value: "text/html; charset=utf-8")
+        return res
     }
 }
