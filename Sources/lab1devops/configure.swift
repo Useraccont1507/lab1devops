@@ -9,19 +9,20 @@ public func configure(_ app: Application) async throws {
     // uncomment to serve files from /Public folder
     // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
     
-    app.http.server.configuration.port = 8000
-    app.http.server.configuration.hostname = "127.0.0.1"
+    let dbHost = Environment.get("DB_HOST") ?? "127.0.0.1"
+    let dbUser = Environment.get("DB_USER") ?? "inventory_user"
+    let dbPass = Environment.get("DB_PASSWORD") ?? "1111"
+    let dbName = Environment.get("DB_NAME") ?? "inventory_db"
     
-
     app.databases.use(.mysql(
-        hostname: "127.0.0.1",
-        username: "inventory_user",
-        password: "1111",
-        database: "inventory_db"
+        hostname: dbHost,
+        username: dbUser,
+        password: dbPass,
+        database: dbName
     ), as: .mysql)
     
     app.migrations.add(CreateInventoryItem())
-
+    
     app.views.use(.leaf)
 
     // register routes
