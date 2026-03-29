@@ -54,7 +54,8 @@ struct InventoryController: RouteCollection {
             return .init(id: id, name: model.name)
         })
         
-        if req.headers.accept.contains(where: { $0.mediaType == .html }) {
+        if req.headers.accept.contains(where: { $0.mediaType == .html }) &&
+           !req.headers.accept.contains(where: { $0.mediaType == .json }) {
             let tableRows = dto.items.map { "<tr><td>\($0.id)</td><td><a href='/items/\($0.id)'>\($0.name)</a></td></tr>" }.joined()
             let html = """
             <!DOCTYPE html>
@@ -89,21 +90,18 @@ struct InventoryController: RouteCollection {
             created_at: TimestampConvertable.toTimestamp(date)
         )
         
-        if req.headers.accept.contains(where: { $0.mediaType == .html }) {
+        if req.headers.accept.contains(where: { $0.mediaType == .html }) &&
+           !req.headers.accept.contains(where: { $0.mediaType == .json }) {
             let html = """
-            <!DOCTYPE html>
-            <html>
-            <body>
-                <h1>Item Details</h1>
-                <p><b>ID:</b> \(dto.id)</p>
-                <p><b>Name:</b> \(dto.name)</p>
-                <p><b>Quantity:</b> \(dto.quantity)</p>
-                <p><b>Created At:</b> \(dto.created_at)</p>
-                <hr>
-                <a href="/items">Back to list</a>
-            </body>
-            </html>
-            """
+                <!DOCTYPE html>
+                <html>
+                <body>
+                    <h1>Item Details</h1>
+                    <p><b>Name:</b> \(dto.name)</p>
+                    <a href="/items">Back</a>
+                </body>
+                </html>
+                """
             return try await htmlToResponse(html, for: req)
         } else {
             return try await dto.encodeResponse(for: req)
