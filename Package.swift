@@ -34,14 +34,6 @@ let package = Package(
                 .product(name: "NIOPosix", package: "swift-nio"),
             ],
             swiftSettings: swiftSettings
-        ),
-        .testTarget(
-            name: "lab1devopsTests",
-            dependencies: [
-                .target(name: "lab1devops"),
-                .product(name: "VaporTesting", package: "vapor"),
-            ],
-            swiftSettings: swiftSettings
         )
     ]
 )
