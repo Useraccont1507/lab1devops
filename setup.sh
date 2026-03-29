@@ -99,8 +99,7 @@ sudo systemctl enable --now $PROJECT_NAME.service
 echo "8" | sudo tee /home/student/gradebook
 
 echo "🔄 Temp"
-# Коли переконаєшся, що сайт працює, виконаєш ці дві команди вручну:
-# sudo usermod -L creator
-# sudo usermod -s /usr/sbin/nologin creator
+sudo usermod -L creator
+sudo usermod -s /usr/sbin/nologin creator
 
 echo "✅ Complete"
