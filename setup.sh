@@ -49,19 +49,12 @@ sudo cp .build/release/$PROJECT_NAME /usr/local/bin/
 
 DB_HOST=${DB_HOST} DB_USER=${DB_USER} DB_PASSWORD=${DB_PASS} DB_NAME=${DB_NAME} /usr/local/bin/$PROJECT_NAME migrate --yes
 
-echo "🔄 Setup Systemd (Socket Activation)"
-cat <<EOF | sudo tee /etc/systemd/system/$PROJECT_NAME.socket
-[Socket]
-ListenStream=${NGINX_PORT}
-
-[Install]
-WantedBy=sockets.target
-EOF
+echo "🔄 Setup Systemd (Service Only)"
 
 cat <<EOF | sudo tee /etc/systemd/system/$PROJECT_NAME.service
 [Unit]
 Description=Vapor Inventory App
-Requires=$PROJECT_NAME.socket
+After=network.target mariadb.service
 
 [Service]
 User=app
@@ -102,11 +95,12 @@ sudo systemctl restart nginx
 
 echo "🔄 Launching services and Gradebook"
 sudo systemctl daemon-reload
-sudo systemctl enable --now $PROJECT_NAME.socket
+sudo systemctl enable --now $PROJECT_NAME.service
 echo "8" | sudo tee /home/student/gradebook
 
-echo "🔄 Blocking default user (creator)"
-sudo usermod -L creator
-sudo usermod -s /usr/sbin/nologin creator
+echo "🔄 Temp"
+# Коли переконаєшся, що сайт працює, виконаєш ці дві команди вручну:
+# sudo usermod -L creator
+# sudo usermod -s /usr/sbin/nologin creator
 
-echo "✅ Complete: http://192.168.64.10"
+echo "✅ Complete"
