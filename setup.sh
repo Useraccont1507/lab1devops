@@ -11,11 +11,7 @@ NGINX_PORT=8000
 
 echo "🔄 Install dependencies"
 sudo apt-get update
-sudo apt-get install -y \
-  binutils git unzip gnupg2 libc6-dev libcurl4-openssl-dev \
-  libedit2 libgcc-13-dev libpython3-dev libsqlite3-dev \
-  libstdc++-13-dev libxml2-dev libz3-dev pkg-config \
-  tzdata zlib1g-dev libncurses6 nginx mariadb-server
+sudo apt-get install -y binutils git unzip gnupg2 libc6-dev libcurl4-openssl-dev libedit2 libgcc-13-dev libpython3-dev libsqlite3-dev libstdc++-13-dev libxml2-dev libz3-dev pkg-config tzdata zlib1g-dev libncurses6 nginx mariadb-server
 
 echo "🔄 Install Swift"
 if [ ! -d "/opt/swift" ]; then
@@ -26,27 +22,28 @@ if [ ! -d "/opt/swift" ]; then
     echo 'export PATH=/opt/swift/usr/bin:$PATH' | sudo tee /etc/profile.d/swift.sh
     source /etc/profile.d/swift.sh
 else
-    echo "✅ Swift has already installed in /opt/swift"
+    echo "✅ Swift has already installed"
 fi
 
 echo "🔄 Setup MariaDB"
 sudo systemctl enable --now mariadb
 sudo mariadb -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME};"
+sudo mariadb -e "CREATE USER IF NOT EXISTS '${DB_USER}'@'127.0.0.1' IDENTIFIED BY '${DB_PASS}';"
+sudo mariadb -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'127.0.0.1';"
 sudo mariadb -e "CREATE USER IF NOT EXISTS '${DB_USER}'@'localhost' IDENTIFIED BY '${DB_PASS}';"
-sudo mariadb -e "GRANT ALL PRIVILEGES ON ${DB_USER}.* TO '${DB_USER}'@'localhost';"
+sudo mariadb -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'localhost';"
 sudo mariadb -e "FLUSH PRIVILEGES;"
 
 echo "🔄 Creating users"
 for u in student teacher operator app; do
     if ! id "$u" &>/dev/null; then
-        sudo useradd -m -s /bin/bash "$u"
+        sudo useradd -m -s /bin/bash -g users "$u" || sudo useradd -m -s /bin/bash "$u"
         echo "$u:1111" | sudo chpasswd
     fi
 done
 
 echo "🔄 Building project and migrations"
 cd $PROJECT_DIR
-
 /opt/swift/usr/bin/swift build -c release
 sudo cp .build/release/$PROJECT_NAME /usr/local/bin/
 
@@ -55,7 +52,7 @@ DB_HOST=${DB_HOST} DB_USER=${DB_USER} DB_PASSWORD=${DB_PASS} DB_NAME=${DB_NAME} 
 echo "🔄 Setup Systemd (Socket Activation)"
 cat <<EOF | sudo tee /etc/systemd/system/$PROJECT_NAME.socket
 [Socket]
-ListenStream=NGINX_PORT
+ListenStream=${NGINX_PORT}
 
 [Install]
 WantedBy=sockets.target
@@ -69,7 +66,6 @@ Requires=$PROJECT_NAME.socket
 [Service]
 User=app
 Environment="LD_LIBRARY_PATH=/opt/swift/usr/lib"
-
 Environment="DB_HOST=${DB_HOST}"
 Environment="DB_USER=${DB_USER}"
 Environment="DB_PASSWORD=${DB_PASS}"
@@ -107,11 +103,10 @@ sudo systemctl restart nginx
 echo "🔄 Launching services and Gradebook"
 sudo systemctl daemon-reload
 sudo systemctl enable --now $PROJECT_NAME.socket
-
 echo "8" | sudo tee /home/student/gradebook
 
 echo "🔄 Blocking default user (creator)"
 sudo usermod -L creator
 sudo usermod -s /usr/sbin/nologin creator
 
-echo "✅ Complete: http://192.168.64.9"
+echo "✅ Complete: http://192.168.64.10"
