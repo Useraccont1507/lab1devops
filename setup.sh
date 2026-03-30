@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PROJECT_NAME="lab1devops"
-PROJECT_DIR="/home/creator/lab1devops"
+PROJECT_DIR=$(pwd)
 DB_HOST="127.0.0.1"
 DB_NAME="inventory_db"
 DB_USER="inventory_user"
