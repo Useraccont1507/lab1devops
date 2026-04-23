@@ -50,6 +50,46 @@ chmod +x setup.sh
 sudo ./setup.sh
 ```
 
+## Запуск через Docker Compose
+
+### Вимоги
+- Docker 24+
+- Docker Compose v2
+
+### Запуск
+
+```bash
+git clone https://github.com/Useraccont1507/lab1devops
+cd lab1devops
+docker compose up -d --build
+```
+
+Застосунок буде доступний за адресою `http://localhost`.
+
+### Зупинка
+
+```bash
+docker compose down
+```
+
+Дані БД зберігаються у Docker volume `db_data` і переживають перезапуск контейнерів та перезавантаження системи.
+
+Для повного видалення даних:
+
+```bash
+docker compose down -v
+```
+
+### Сервіси
+
+| Сервіс | Образ | Опис |
+|--------|-------|------|
+| `db` | `mariadb:11` | MariaDB з persistent volume |
+| `app` | build from `Dockerfile` | Swift/Vapor API (порт 8000 всередині) |
+| `nginx` | `nginx:alpine` | Reverse proxy (порт 80 → app:8000) |
+
+---
+
 ## Тестування
 
 Тестування доступності веб-сервера (Nginx + Vapor + MariaDB):
