@@ -8,23 +8,32 @@ RUN swift package resolve
 
 COPY Sources ./Sources
 COPY Resources ./Resources
-RUN swift build -c release --static-swift-stdlib 2>&1
 
-# Stage 2: runtime
+RUN swift build -c release --static-swift-stdlib
+
+# Stage 2: runtime 
 FROM ubuntu:22.04
 
-RUN apt-get update && apt-get install -y \
-    libcurl4 \
-    libxml2 \
-    ca-certificates \
-    tzdata \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        libcurl4 \
+        libxml2 \
+        ca-certificates \
+        tzdata \
     && rm -rf /var/lib/apt/lists/*
 
+RUN useradd --system --create-home --shell /bin/false vapor
 WORKDIR /app
+RUN chown vapor:vapor /app
 
-COPY --from=build /build/.build/release/lab1devops /app/
-COPY --from=build /build/Resources /app/Resources
+COPY --from=build --chown=vapor:vapor /build/.build/release/lab1devops ./
+COPY --from=build --chown=vapor:vapor /build/Resources ./Resources
+
+USER vapor
 
 EXPOSE 8000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD ["/app/lab1devops", "health-check"] || exit 1
 
 CMD ["/app/lab1devops", "serve", "--hostname", "0.0.0.0", "--port", "8000"]
