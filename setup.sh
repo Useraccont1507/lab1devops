@@ -15,11 +15,12 @@ sudo apt-get install -y binutils git unzip gnupg2 libc6-dev libcurl4-openssl-dev
 
 echo "🔄 Install Swift"
 if [ ! -d "/opt/swift" ]; then
-    cd /tmp
+    cd /tmp || exit 1
     wget https://download.swift.org/swift-6.0.1-release/ubuntu2404-aarch64/swift-6.0.1-RELEASE/swift-6.0.1-RELEASE-ubuntu24.04-aarch64.tar.gz
     tar -xzf swift-6.0.1-RELEASE-ubuntu24.04-aarch64.tar.gz
     sudo mv swift-6.0.1-RELEASE-ubuntu24.04-aarch64 /opt/swift
-    echo 'export PATH=/opt/swift/usr/bin:$PATH' | sudo tee /etc/profile.d/swift.sh
+    echo "export PATH=/opt/swift/usr/bin:\$PATH" | sudo tee /etc/profile.d/swift.sh
+    # shellcheck source=/dev/null
     source /etc/profile.d/swift.sh
 else
     echo "✅ Swift has already installed"
@@ -43,7 +44,7 @@ for u in student teacher operator app; do
 done
 
 echo "🔄 Building project and migrations"
-cd $PROJECT_DIR
+cd "$PROJECT_DIR" || exit 1
 /opt/swift/usr/bin/swift build -c release
 sudo cp .build/release/$PROJECT_NAME /usr/local/bin/
 
