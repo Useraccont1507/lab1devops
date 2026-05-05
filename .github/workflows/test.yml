@@ -29,8 +29,11 @@ jobs:
 
       - name: Generate coverage report
         run: |
-          BINARY=$(swift build --show-bin-path 2>/dev/null)/AppTests.xctest
+          BINARY=$(find .build -name "AppTests.xctest" | head -1)
           PROFDATA=$(find .build -name "*.profdata" | head -1)
+
+          echo "Binary: $BINARY"
+          echo "Profdata: $PROFDATA"
 
           llvm-cov report \
             "$BINARY" \
