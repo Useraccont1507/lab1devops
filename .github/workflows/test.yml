@@ -1,0 +1,57 @@
+name: Test
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    name: Swift Test + Coverage
+    runs-on: ubuntu-latest
+    container:
+      image: swift:6.0.1-jammy
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache .build
+        uses: actions/cache@v4
+        with:
+          path: .build
+          key: ${{ runner.os }}-swift-${{ hashFiles('Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-swift-
+
+      - name: Run tests with coverage
+        run: swift test --enable-code-coverage
+
+      - name: Generate coverage report
+        run: |
+          BINARY=$(swift build --show-bin-path 2>/dev/null)/AppTests.xctest
+          PROFDATA=$(find .build -name "*.profdata" | head -1)
+
+          llvm-cov report \
+            "$BINARY" \
+            --instr-profile="$PROFDATA" \
+            --ignore-filename-regex=".build|Tests" \
+            > coverage-summary.txt
+
+          llvm-cov show \
+            "$BINARY" \
+            --instr-profile="$PROFDATA" \
+            --ignore-filename-regex=".build|Tests" \
+            --format=text \
+            > coverage-full.txt
+
+          cat coverage-summary.txt
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: |
+            coverage-summary.txt
+            coverage-full.txt
+          retention-days: 30
