@@ -7,15 +7,28 @@ excluded:
 
 disabled_rules:
   - trailing_whitespace
+  - trailing_newline
+  - statement_position
 
 opt_in_rules:
   - empty_count
-  - explicit_init
   - first_where
 
+identifier_name:
+  min_length:
+    warning: 1
+    error: 1
+  excluded:
+    - v
+    - id
+    - db
+    - created_at
+
 line_length:
-  warning: 130
-  error: 200
+  warning: 200
+  error: 250
+  ignores_comments: true
+  ignores_urls: true
 
 type_body_length:
   warning: 300
