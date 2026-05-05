@@ -25,6 +25,14 @@ let package = Package(
         .executableTarget(
             name: "lab1devops",
             dependencies: [
+                .target(name: "App")
+            ],
+            path: "Sources/lab1devops",
+            sources: ["entrypoint.swift"]
+        ),
+        .target(
+            name: "App",
+            dependencies: [
                 .product(name: "Fluent", package: "fluent"),
                 .product(name: "FluentSQLiteDriver", package: "fluent-sqlite-driver"),
                 .product(name: "FluentMySQLDriver", package: "fluent-mysql-driver"),
@@ -33,6 +41,18 @@ let package = Package(
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "NIOPosix", package: "swift-nio"),
             ],
+            path: "Sources/lab1devops",
+            exclude: ["entrypoint.swift"],
+            swiftSettings: swiftSettings
+        ),
+        .testTarget(
+            name: "AppTests",
+            dependencies: [
+                .target(name: "App"),
+                .product(name: "XCTVapor", package: "vapor"),
+                .product(name: "FluentSQLiteDriver", package: "fluent-sqlite-driver"),
+            ],
+            path: "Tests/AppTests",
             swiftSettings: swiftSettings
         )
     ]
