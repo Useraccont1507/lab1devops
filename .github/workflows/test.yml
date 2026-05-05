@@ -29,7 +29,7 @@ jobs:
 
       - name: Generate coverage report
         run: |
-          BINARY=$(find .build -name "AppTests.xctest" | head -1)
+          BINARY=$(find .build -name "*.xctest" -not -path "*/codecov/*" | head -1)
           PROFDATA=$(find .build -name "*.profdata" | head -1)
 
           echo "Binary: $BINARY"
