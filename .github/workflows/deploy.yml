@@ -49,14 +49,14 @@ jobs:
 
   deploy:
     name: Deploy to Target Node
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: build-and-push
     environment: production
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deploy via SSH
+      - name: Deploy to Target Node via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.DEPLOY_HOST }}
