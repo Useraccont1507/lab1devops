@@ -9,7 +9,7 @@ RUN swift package resolve
 COPY Sources ./Sources
 COPY Resources ./Resources
 
-RUN swift build -c release --static-swift-stdlib
+RUN swift build -c release --static-swift-stdlib --product lab1devops
 
 # Stage 2: runtime
 FROM ubuntu:22.04
