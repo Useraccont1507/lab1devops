@@ -59,6 +59,7 @@ jobs:
       - name: Deploy to Target Node via SSH
         run: |
           IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}"
+          IMAGE="${IMAGE,,}"
 
           ssh -i /home/runner/.ssh/deploy_key \
               -o StrictHostKeyChecking=no \
