@@ -8,6 +8,7 @@ RUN swift package resolve
 
 COPY Sources ./Sources
 COPY Resources ./Resources
+RUN mkdir -p Tests/AppTests
 
 RUN swift build -c release --static-swift-stdlib --product lab1devops
 
