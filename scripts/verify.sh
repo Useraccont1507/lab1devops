@@ -50,12 +50,12 @@ else
 fi
 
 echo ""
-echo "-- Nginx running --"
-if systemctl is-active --quiet nginx; then
-    echo "  [OK] nginx is active"
+echo "-- Nginx container running --"
+if docker ps --format '{{.Names}}' | grep -q "nginx"; then
+    echo "  [OK] nginx container is running"
     PASS=$((PASS + 1))
 else
-    echo "  [FAIL] nginx is NOT active"
+    echo "  [FAIL] nginx container is NOT running"
     FAIL=$((FAIL + 1))
 fi
 
