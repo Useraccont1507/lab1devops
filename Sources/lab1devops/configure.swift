@@ -18,7 +18,8 @@ public func configure(_ app: Application) async throws {
         hostname: dbHost,
         username: dbUser,
         password: dbPass,
-        database: dbName
+        database: dbName,
+        tlsConfiguration: .forClient(certificateVerification: .none)
     ), as: .mysql)
     
     app.migrations.add(CreateInventoryItem())
